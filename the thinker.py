@@ -10,6 +10,7 @@ from model import Linear_QNet , QTrainer
 MAX_MEMOREY = 200000
 BATCH_SIZE = 10000
 LEARNING_RATE = 0.001
+the_difficulty = 2
 
 number_of_random_rounds = 500
 
@@ -123,9 +124,9 @@ def plot(scores, mean_scores , proc):
     plt.text(len(scores)-1, scores[-1], str(scores[-1]))
     plt.text(len(mean_scores)-1, mean_scores[-1], str(mean_scores[-1]))
     try:
-        plt.savefig("training graph    proc = "+str(proc)+".png")
+        plt.savefig(str(the_difficulty)+" = difficulty    training graph    proc = "+str(proc)+".png")
     except:
-        plt.savefig(" spare    =    training graph    proc = "+str(proc)+".png")
+        plt.savefig(str(the_difficulty)+" = difficulty spare    =    training graph    proc = "+str(proc)+".png")
     plt.show(block=False)
 #    plt.pause(.1)
 
@@ -143,7 +144,7 @@ def train(proc = "naa"):
         move_decided , move_decided_index = agent.choose_move(old_game_state)
         reward, game_over , score = agent.game.play_thinker_step(move_decided_index)
 
-        agent.game.computer_plays_turn()
+        agent.game.computer_plays_turn( difficulty = the_difficulty)
 
         new_game_state = agent.get_simple_state()
 
@@ -170,80 +171,4 @@ def train(proc = "naa"):
             game_over = False
 train(proc = "naa")
 
-scrap = '''
-def get_game_state(self):
-state = []
-positions_of_thinkers_tiles = []
-positions_of_enemy_tiles = []
-positions_of_thinkers_pairs_of_tiles_with_room_for_2_more_to_make_horizontal_line = []
-positions_of_thinkers_pairs_of_tiles_with_room_for_1_more_to_make_horizontal_line = []
-positions_of_enemies_pairs_of_tiles_with_room_for_2_more_to_make_horizontal_line = []
-positions_of_enemies_pairs_of_tiles_with_room_for_1_more_to_make_horizontal_line = []
-positions_of_thinkers_pairs_of_tiles_with_room_for_2_more_to_make_box = []
-positions_of_thinkers_pairs_of_tiles_with_room_for_1_more_to_make_box = []
-positions_of_enemies_pairs_of_tiles_with_room_for_2_more_to_make_box = []
-positions_of_enemies_pairs_of_tiles_with_room_for_1_more_to_make_box = []
-for x in range(len(self.game.slots)-1):
-for y ,  y_ind in zip(self.game.slots[x] , range(len(self.game.slots[x])-1)):
-    if y.occupied_by_player and y.occupied_by_computer:
-        raise Execption("bugger, this should never happen")
-    if y.occupied_by_player:
-        positions_of_thinkers_tiles.append(True)
-        positions_of_enemy_tiles.append(False)
-    elif y.occupied_by_computer:
-        positions_of_thinkers_tiles.append(False)
-        positions_of_enemy_tiles.append(True)
-    else:
-        positions_of_thinkers_tiles.append(False)
-        positions_of_enemy_tiles.append(False)
 
-    ## if 2 needed (horizontal)
-    ## if 2 slots occupied
-    if (self.game.slots[x][y].occupied_by_player and self.game.slots[x+1][y].occupied_by_player) or :## if 2 slots occupied
-        ## and 2 slots are empty
-        if (self.game.slots[x-1][y].empty() and self.game.slots[x+2][y].empty()) or (self.game.slots[x-1][y].empty() and self.game.slots[x-2][y].empty() ) or (self.game.slots[x+2][y].empty() and self.game.slots[x+3][y].empty() ):
-            positions_of_thinkers_pairs_of_tiles_with_room_for_2_more_to_make_horizontal_line.append(True)
-        else:
-            positions_of_thinkers_pairs_of_tiles_with_room_for_2_more_to_make_horizontal_line.append(False)
-   ## if 2 slots occupied (other tile)
-    elif (self.game.slots[x][y].occupied_by_player and self.game.slots[x-1][y].occupied_by_player):
-        ## and 2 slots are empty
-        if (self.game.slots[x+1][y].empty() and self.game.slots[x+2][y].empty()) or (self.game.slots[x+1][y].empty() and self.game.slots[x-2][y].empty() ) or (self.game.slots[x-2][y].empty() and self.game.slots[x-3][y].empty() ):
-            positions_of_thinkers_pairs_of_tiles_with_room_for_2_more_to_make_horizontal_line.append(True)
-        else:
-            positions_of_thinkers_pairs_of_tiles_with_room_for_2_more_to_make_horizontal_line.append(False)
-    ## no 2 slots here
-    else:
-        positions_of_thinkers_pairs_of_tiles_with_room_for_2_more_to_make_horizontal_line.append(False)
-
-
-
-    ## if 1 needed   (left tile)(horizontal)
-    if (self.game.slots[x][y].occupied_by_player and self.game.slots[x+1][y].occupied_by_player and self.game.slots[x+2][y].occupied_by_player):
-        if (self.game.slots[x-1][y].empty()) or (self.game.slots[x+3][y].empty()):
-            positions_of_thinkers_pairs_of_tiles_with_room_for_1_more_to_make_horizontal_line.append(True)
-        else:
-            positions_of_thinkers_pairs_of_tiles_with_room_for_1_more_to_make_horizontal_line.append(False)
-    #        (middle tile )
-    elif (self.game.slots[x][y].occupied_by_player and self.game.slots[x+1][y].occupied_by_player and self.game.slots[x-1][y].occupied_by_player):
-        if (self.game.slots[x-2][y].empty()) or (self.game.slots[x+2][y].empty()):
-                positions_of_thinkers_pairs_of_tiles_with_room_for_1_more_to_make_horizontal_line.append(True)
-            else:
-                positions_of_thinkers_pairs_of_tiles_with_room_for_1_more_to_make_horizontal_line.append(False)
-    ##   right tile
-elif (self.game.slots[x][y].occupied_by_player and self.game.slots[x-1][y].occupied_by_player and self.game.slots[x-2][y].occupied_by_player):
-        if (self.game.slots[x+1][y].empty()) or (self.game.slots[x=3][y].empty()):
-            positions_of_thinkers_pairs_of_tiles_with_room_for_1_more_to_make_horizontal_line.append(True)
-        else:
-            positions_of_thinkers_pairs_of_tiles_with_room_for_1_more_to_make_horizontal_line.append(False)
-
-
-
-     and self.game.slots[x+2][y].occupied_by_player)  or (self.game.slots[x-1][y].occupied_by_player and self.game.slots[x][y].occupied_by_player and self.game.slots[x+1][y].occupied_by_player and ) or (self.game.slots[x-2][y].occupied_by_player and self.game.slots[x-1][y].occupied_by_player and self.game.slots[x][y].occupied_by_player):## if 3 slots occupied
-        if (self.game.slots[x-1][y].occupied_by_player == False
-            positions_of_thinkers_pairs_of_tiles_with_room_for_2_more_to_make_horizontal_line.append(True)
-        else:
-            positions_of_thinkers_pairs_of_tiles_with_room_for_2_more_to_make_horizontal_line.append(False)
-    else:
-        positions_of_thinkers_pairs_of_tiles_with_room_for_2_more_to_make_horizontal_line.append(False)
-        '''
