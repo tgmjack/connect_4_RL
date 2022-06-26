@@ -3,13 +3,9 @@ from pygame import *
 import math
 import numpy as np
 import random
+import copy
 
 
-
-# should i have reward reset between games
-
-
-#import time
 
 ## i built this game specifically to teach a machine through RL how to platy it
 mi_turns = [0,1,1,2,4,5,6,7,8, 8 , 9 , 1 , 5, 6,6,8,6,5,5,3,4,9,6, 1]
@@ -257,19 +253,30 @@ class connect_4_game():
     def find_xy_which_wins_the_game(self):
         og_copy = copy.deepcopy(self.slots)
         for x in range(len(self.slots)):
-            y = self.find_lowest_avaialable_y_at_this_x(x , True)
-            self.slots[x][y].occupied_by_computer = True
+            y = self.find_lowest_avaialable_y_at_this_x(x)
+            y.occupied_by_computer = True
             m1 = self.check_for_box_of_4(True)
             m2 =self.check_for_line_of_4(True)
-            self.slots[x][y].occupied_by_computer = False
+            y.occupied_by_computer = False
             if m1:
                 if m2:
-                    return [x , y];
+                    return [x , y.y];
         return False
 
 
     def see_if_computer_loses_unless_it_blocks(self):
-        pass
+        og_copy = copy.deepcopy(self.slots)
+        for x in range(len(self.slots)):
+            y = self.find_lowest_avaialable_y_at_this_x(x)
+            if y.empty():
+                y.occupied_by_player = True
+                m1 = self.check_for_box_of_4(True)
+                m2 =self.check_for_line_of_4(True)
+                y.occupied_by_player = False
+                if m1:
+                    if m2:
+                        return [x , y.y];
+        return False
 
     def find_lowest_avaialable_y_at_this_x(self , x):
         lowest_y = False
@@ -278,6 +285,12 @@ class connect_4_game():
             if y.occupied_by_computer == False and y.occupied_by_player == False:
                 lowest_y = y
         return lowest_y;
+
+
+
+
+    def check_if_player_has_line_of_3_or_box_of_3(self):
+        self.check_for_box_of_3()
 
     def computer_choose_connecting_slot(self):
         places_to_make_connections = []
@@ -321,26 +334,60 @@ class connect_4_game():
                 slot.occupied_by_computer = True
                 worked = True
                 return slot
-    def computer_plays_turn(self):
+    def computer_plays_turn(self , difficulty = 2):
         chooser = random.random()
-        if chooser > 0.25:
-        #    print("computer_plays_turn 1")
-            num_occupied_by_computer = 0
-            for x in self.slots:
-                for y in x:
-                    if y.occupied_by_computer:
-                        num_occupied_by_computer+= 1
-            if num_occupied_by_computer == 0:
-    #            print("computer_plays_turn 2")
-                self.computer_choose_random_slot()
+        if difficulty == 1:
+            if chooser > 0.25:
+            #    print("computer_plays_turn 1")
+                num_occupied_by_computer = 0
+                for x in self.slots:
+                    for y in x:
+                        if y.occupied_by_computer:
+                            num_occupied_by_computer+= 1
+                if num_occupied_by_computer == 0:
+        #            print("computer_plays_turn 2")
+                    self.computer_choose_random_slot()
+                else:
+        #            print("computer_plays_turn 3")
+                    self.computer_choose_connecting_slot()
             else:
-    #            print("computer_plays_turn 3")
-                self.computer_choose_connecting_slot()
+        #        print("computer_plays_turn 4")
+                self.computer_choose_random_slot()
+        elif difficulty == 2:
+
+            A = self.see_if_computer_loses_unless_it_blocks()
+            if type(A)== type(True):
+                if A == False:
+                    if chooser > 0.25:
+                        self.computer_choose_connecting_slot()
+                    else:
+                        self.computer_choose_random_slot()
+                else:
+                    raise Exception("  how   ?")
+            else:
+                self.slots[A[0]][A[1]].occupied_by_computer = True
+
+        elif difficulty == 3:
+            V = self.find_xy_which_wins_the_game()
+            if type(V)== type(True):
+                if V == False:
+                    A = self.see_if_computer_loses_unless_it_blocks()
+                    if type(A)== type(True):
+                        if A == False:
+                            if chooser > 0.25:
+                                self.computer_choose_connecting_slot()
+                            else:
+                                self.computer_choose_random_slot()
+                        else:
+                            raise Exception("  how   ?")
+                    else:
+                        self.slots[A[0]][A[1]].occupied_by_computer = True
+                else:
+                    raise Exception("  how   ?")
+            else:
+                self.slots[V[0]][V[1]].occupied_by_computer = True
         else:
-    #        print("computer_plays_turn 4")
-            self.computer_choose_random_slot()
-
-
+            raise Exception("  no such difficulty ")
     def draw(self , display ):
         display.fill(white)
         screen_width = 800
@@ -432,3 +479,4 @@ class connect_4_game():
 
 #thegame = connect_4_game()
 #thegame.one_human_game()
+
