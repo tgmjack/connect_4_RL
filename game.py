@@ -4,8 +4,10 @@ import math
 import numpy as np
 import random
 import copy
+import time as tim
 
-
+rows = 6
+cols = 6
 
 ## i built this game specifically to teach a machine through RL how to platy it
 mi_turns = [0,1,1,2,4,5,6,7,8, 8 , 9 , 1 , 5, 6,6,8,6,5,5,3,4,9,6, 1]
@@ -39,18 +41,38 @@ class connect_4_game():
     def __init__(self):
         self.player_score = 0
         self.computer_score = 0
+        self.draw_count = 0
         self.game_over = False
-        self.x_rows = 25
-        self.y_rows = 25
+        self.x_rows = rows
+        self.y_rows = cols
         self.slots = []
         self.turn_counter = 0
         self.reward  = 0
         self.score = 0
+
         for x in range(self.x_rows):
             ys = []
             for y in range(self.y_rows):
                 ys.append(slot(x , y))
             self.slots.append(ys)
+
+    def completletley_full_check(self):
+        all_failed = True
+        for x in range(len(self.slots)):
+            check = self.find_lowest_avaialable_y_at_this_x(x)
+            if type(check) == type(True):
+                if check == False:
+                    pass
+                else:
+                    all_failed = False
+            else:
+                all_failed = False
+        if all_failed:
+            pass
+    #        tim.sleep(9)
+        return all_failed;
+
+
 
     def new_game(self):
 
@@ -64,20 +86,32 @@ class connect_4_game():
             for y in range(self.y_rows):
                 ys.append(slot(x , y))
             self.slots.append(ys)
+    def end_round_with_no_winner(self):
+        self.game_over = True
+        self.reward += -0.1
+        self.new_game()
+
     def computer_win(self):
         self.game_over = True
         self.computer_score+= 1
         self.reward += -1
         self.new_game()
+        print("comp win")
+    #    tim.sleep(9)
+    #    print(5/0)
     def player_win(self):
         self.game_over = True
         self.player_score+= 1
         self.reward += 1
         self.new_game()
+        print("player win")
+    #    tim.sleep(9)
+    #    print(9/0)
     def check_for_line_of_4(self , ret=False):
 
         ## horizontal check
-
+#        for i in range(2):
+#            print("################################")
         for x in range(len(self.slots)):
             for y in range(len(self.slots[x])):
 
@@ -94,7 +128,7 @@ class connect_4_game():
                                     if slot_3right.occupied_by_computer == True:
                                         if ret:
                                             return True
-                                        print("horiz line of 4 comp")
+        #                                print("horiz line of 4 comp   starting with "+str(slot.x)+" , "+str(slot.y) +" then "+ str(slot_right.x)+ " , "+str(slot_right.y)+" then "+ str(slot_2right.x)+ " , "+str(slot_2right.y)+" then "+ str(slot_3right.x)+ " , "+str(slot_3right.y))
                                         self.computer_win()
                         if slot.occupied_by_player == True:
                             if slot_right.occupied_by_player == True:
@@ -102,7 +136,8 @@ class connect_4_game():
                                     if slot_3right.occupied_by_player == True:
                                         if ret:
                                             return True
-                                        print("vert line of 4 player")
+        #                                    print("horizontal line of 4 player   starting with "+str(slot.x)+" , "+str(slot.y) +" then "+ str(slot_right.x)+ " , "+str(slot_right.y)+" then "+ str(slot_2right.x)+ " , "+str(slot_2right.y)+" then "+ str(slot_3right.x)+ " , "+str(slot_3right.y) )
+                    #                    print("vert line of 4 player")
                                         self.player_win()
                     except IndexError:
                         pass
@@ -126,8 +161,10 @@ class connect_4_game():
                                 if slot_2up.occupied_by_computer == True:
 #                                    print("vert line of 4   comp     ccccc   ")
                                     if slot_3up.occupied_by_computer == True:
+        #                                print("vert line of 4 comp   starting with "+str(slot.x)+" , "+str(slot.y)  +" then "+ str(slot_up.x)+ " , "+str(slot_up.y)+" then "+ str(slot_2up.x)+ " , "+str(slot_2up.y)+" then "+ str(slot_3up.x)+ " , "+str(slot_3up.y) )
                                         if ret:
                                             return True
+
 #                                        print("vert line of 4   comp  ")
                                         self.computer_win()
                         if slot.occupied_by_player == True:
@@ -137,6 +174,7 @@ class connect_4_game():
                                 if slot_2up.occupied_by_player == True:
 #                                    print("vert line of 4   p    ccccc ")
                                     if slot_3up.occupied_by_player == True:
+        #                                print("vert line of 4 player   starting with "+str(slot.x)+" , "+str(slot.y)  +" then "+ str(slot_up.x)+ " , "+str(slot_up.y)+" then "+ str(slot_2up.x)+ " , "+str(slot_2up.y)+" then "+ str(slot_3up.x)+ " , "+str(slot_3up.y) )
                                         if ret:
                                             return True
 #                                        print("vert line of 4 player")
@@ -153,33 +191,36 @@ class connect_4_game():
                 if slot.occupied_by_computer == True or slot.occupied_by_player == True:
                     try:
         #                print("good one = "+str(x)+ " , " + str(y))
-                        slot_up = self.slots[x+1][y-1]
-                        slot_2up = self.slots[x+2][y-2]
-                        slot_3up = self.slots[x+3][y-3]
-                        if slot.occupied_by_computer == True:
-#                            print("diag line of 4   comp    aaaa    x, y = "+str(x)+ " , "+str(y))
-                            if slot_up.occupied_by_computer == True:
-#                                print("diag line of 4   comp  bbbbbb   ")
-                                if slot_2up.occupied_by_computer == True:
-#                                    print("diag line of 4   comp     ccccc   ")
-                                    if slot_3up.occupied_by_computer == True:
-                                        if ret:
-                                            return True
-#                                        print("diag line of 4   comp  ")
-                                        self.computer_win()
-                        if slot.occupied_by_player == True:
-#                            print("diag line of 4  p    aaaa  x, y = "+str(x)+ " , "+str(y))
-                            if slot_up.occupied_by_player == True:
-#                                print("diag line of 4   p    bbbb ")
-                                if slot_2up.occupied_by_player == True:
-#                                    print("diag line of 4   p    ccccc ")
-                                    if slot_3up.occupied_by_player == True:
-                                        if ret:
-                                            return True
-#                                        print("diag line of 4 player")
-                                        self.player_win()
+                        if y-3 < len(self.slots[x])-1:
+                            slot_up = self.slots[x+1][y-1]
+                            slot_2up = self.slots[x+2][y-2]
+                            slot_3up = self.slots[x+3][y-3]
+                            if slot.occupied_by_computer == True:
+    #                            print("diag line of 4   comp    aaaa    x, y = "+str(x)+ " , "+str(y))
+                                if slot_up.occupied_by_computer == True:
+    #                                print("diag line of 4   comp  bbbbbb   ")
+                                    if slot_2up.occupied_by_computer == True:
+    #                                    print("diag line of 4   comp     ccccc   ")
+                                        if slot_3up.occupied_by_computer == True:
+        #                                    print("diag line of 4 comp   starting with "+str(slot.x)+" , "+str(slot.y)  +" then "+ str(slot_up.x)+ " , "+str(slot_up.y)+" then "+ str(slot_2up.x)+ " , "+str(slot_2up.y)+" then "+ str(slot_3up.x)+ " , "+str(slot_3up.y) )
+                                            if ret:
+                                                return True
+    #                                        print("diag line of 4   comp  ")
+                                            self.computer_win()
+                            if slot.occupied_by_player == True:
+    #                            print("diag line of 4  p    aaaa  x, y = "+str(x)+ " , "+str(y))
+                                if slot_up.occupied_by_player == True:
+    #                                print("diag line of 4   p    bbbb ")
+                                    if slot_2up.occupied_by_player == True:
+    #                                    print("diag line of 4   p    ccccc ")
+                                        if slot_3up.occupied_by_player == True:
+        #                                    print(" diag line of 4 player   starting with "+str(slot.x)+" , "+str(slot.y) +" then "+ str(slot_up.x)+ " , "+str(slot_up.y)+" then "+ str(slot_2up.x)+ " , "+str(slot_2up.y)+" then "+ str(slot_3up.x)+ " , "+str(slot_3up.y)  )
+                                            if ret:
+                                                return True
+    #                                        print("diag line of 4 player")
+                                            self.player_win()
 
-                                        diag = True
+                                            diag = True
                     except IndexError:
                         pass
 
@@ -192,33 +233,37 @@ class connect_4_game():
         #            print(str(x)+ " , " + str(y))
                 if slot.occupied_by_computer == True or slot.occupied_by_player == True:
                     try:
-        #                print("good one = "+str(x)+ " , " + str(y))
-                        slot_up = self.slots[x+1][y+1]
-                        slot_2up = self.slots[x+2][y+2]
-                        slot_3up = self.slots[x+3][y+3]
-                        if slot.occupied_by_computer == True:
-#                            print("diag line of 4   comp    aaaa    x, y = "+str(x)+ " , "+str(y))
-                            if slot_up.occupied_by_computer == True:
-#                                print("diag line of 4   comp  bbbbbb   ")
-                                if slot_2up.occupied_by_computer == True:
-#                                    print("diag line of 4   comp     ccccc   ")
-                                    if slot_3up.occupied_by_computer == True:
-                                        if ret:
-                                            return True
-#                                        print("diag line of 4   comp  ")
-                                        self.computer_win()
+        #                print(y)
+                        if y-3 < len(self.slots[x])-1:
+        #                    print("good one = "+str(x)+ " , " + str(y))
+                            slot_up = self.slots[x+1][y+1]
+                            slot_2up = self.slots[x+2][y+2]
+                            slot_3up = self.slots[x+3][y+3]
+                            if slot.occupied_by_computer == True:
+    #                            print("diag line of 4   comp    aaaa    x, y = "+str(x)+ " , "+str(y))
+                                if slot_up.occupied_by_computer == True:
+    #                                print("diag line of 4   comp  bbbbbb   ")
+                                    if slot_2up.occupied_by_computer == True:
+    #                                    print("diag line of 4   comp     ccccc   ")
+                                        if slot_3up.occupied_by_computer == True:
+        #                                    print(" other diag line of 4 comp   starting with "+str(slot.x)+" , "+str(slot.y)  +" then "+ str(slot_up.x)+ " , "+str(slot_up.y)+" then "+ str(slot_2up.x)+ " , "+str(slot_2up.y)+" then "+ str(slot_3up.x)+ " , "+str(slot_3up.y) )
+                                            if ret:
+                                                return True
+    #                                        print("diag line of 4   comp  ")
+                                            self.computer_win()
 
-                        if slot.occupied_by_player == True:
-#                            print("diag line of 4  p    aaaa  x, y = "+str(x)+ " , "+str(y))
-                            if slot_up.occupied_by_player == True:
-#                                print("diag line of 4   p    bbbb ")
-                                if slot_2up.occupied_by_player == True:
-#                                    print("diag line of 4   p    ccccc ")
-                                    if slot_3up.occupied_by_player == True:
-                                        if ret:
-                                            return True
-#                                        print("diag line of 4 player")
-                                        self.player_win()
+                            if slot.occupied_by_player == True:
+    #                            print("diag line of 4  p    aaaa  x, y = "+str(x)+ " , "+str(y))
+                                if slot_up.occupied_by_player == True:
+    #                                print("diag line of 4   p    bbbb ")
+                                    if slot_2up.occupied_by_player == True:
+    #                                    print("diag line of 4   p    ccccc ")
+                                        if slot_3up.occupied_by_player == True:
+        #                                    print("other   diag line of 4 player   starting with "+str(slot.x)+" , "+str(slot.y)  +" then "+ str(slot_up.x)+ " , "+str(slot_up.y)+" then "+ str(slot_2up.x)+ " , "+str(slot_2up.y)+" then "+ str(slot_3up.x)+ " , "+str(slot_3up.y) )
+                                            if ret:
+                                                return True
+    #                                        print("diag line of 4 player")
+                                            self.player_win()
 
                     except IndexError:
                         pass
@@ -254,28 +299,41 @@ class connect_4_game():
         og_copy = copy.deepcopy(self.slots)
         for x in range(len(self.slots)):
             y = self.find_lowest_avaialable_y_at_this_x(x)
-            y.occupied_by_computer = True
-            m1 = self.check_for_box_of_4(True)
-            m2 =self.check_for_line_of_4(True)
-            y.occupied_by_computer = False
-            if m1:
-                if m2:
-                    return [x , y.y];
+            if type(y) != type(True):
+                y.occupied_by_computer = True
+                m1 = self.check_for_box_of_4(True)
+                m2 =self.check_for_line_of_4(True)
+                y.occupied_by_computer = False
+                if m1:
+                    if m2:
+                        return [x , y.y];
         return False
 
 
     def see_if_computer_loses_unless_it_blocks(self):
+#        print("hello see_if_computer_loses_unless_it_blocks(self)")
         og_copy = copy.deepcopy(self.slots)
+#        print("1")
         for x in range(len(self.slots)):
+#            print("2")
             y = self.find_lowest_avaialable_y_at_this_x(x)
-            if y.empty():
-                y.occupied_by_player = True
-                m1 = self.check_for_box_of_4(True)
-                m2 =self.check_for_line_of_4(True)
-                y.occupied_by_player = False
-                if m1:
-                    if m2:
+            if type(y) != type(True):
+                if y.empty():
+    #                print("3")
+            #        print(str(y)+ "  y  ")
+                    y.occupied_by_player = True
+                    m1 = self.check_for_box_of_4(True)
+                    m2 =self.check_for_line_of_4(True)
+                    y.occupied_by_player = False
+                    if m1:
+    #                    print("4")
                         return [x , y.y];
+                    if m2:
+    #                    print("5")
+                        return [x , y.y];
+            else:
+                pass  ### its fine
+    #    print("6")
         return False
 
     def find_lowest_avaialable_y_at_this_x(self , x):
@@ -313,7 +371,7 @@ class connect_4_game():
                     if connected:
                         places_to_make_connections.append([x , y])
             except AttributeError:
-                print("weve filled this up ")
+                pass
         try:
             index = random.randint(0,len(places_to_make_connections)-1)
             p = places_to_make_connections[index]
@@ -412,14 +470,12 @@ class connect_4_game():
 
         pygame.font.init()
         my_font = pygame.font.SysFont('Comic Sans MS', 30)
-        text_surface = my_font.render(str(self.player_score), False, (0, 0, 0))
-        display.blit(text_surface, (40,15))
-
-
-        pygame.font.init()
-        my_font = pygame.font.SysFont('Comic Sans MS', 30)
-        text_surface = my_font.render(str(self.computer_score), False, (0, 0, 0))
-        display.blit(text_surface, (400,15))
+        text_surface = my_font.render("wins = "+str(self.player_score), False, (0, 0, 0))
+        display.blit(text_surface, (40,10))
+        text_surface = my_font.render("loses = "+str(self.computer_score), False, (0, 0, 0))
+        display.blit(text_surface, (250,10))
+        text_surface = my_font.render("draws = "+str(self.draw_count), False, (0, 0, 0))
+        display.blit(text_surface, (450,10))
 
 
         pygame.display.update()
@@ -437,7 +493,10 @@ class connect_4_game():
             x = mi_turns[self.turn_counter]
         self.turn_counter+= 1
         y = self.find_lowest_avaialable_y_at_this_x(x)
-        self.slots[x][y.y].occupied_by_player = True
+        if type(y) != type(True):
+            self.slots[x][y.y].occupied_by_player = True
+            return True
+        return False;
     #    print("human just did = "+str(x)+ "     ,     "+ str(y.y))
       #  time.sleep(3)
 
@@ -467,16 +526,46 @@ class connect_4_game():
           #  time.sleep(1)
             self.check_for_win()
 
+    def draw_reset(self):
+        self.draw_count += 1
+        self.new_game();
+
     def play_thinker_step(self, move_decided):
 
-        self.human_plays_turn(x = move_decided)
+        worked = self.human_plays_turn(x = move_decided)
+        if worked == False:
+#            all_failed = self.completletley_full_check()
+#            if all_failed:
+#                self.end_round_with_no_winner()
+#                print("draw")
+#                return self.reward, True , ratio , True;
+            self.reward+= - 0.001;
+            if (self.player_score > 0 and  self.computer_score > 0):
+                ratio = (self.player_score / self.computer_score)
+            else:
+                 ratio = 0
+            all_failed = self.completletley_full_check()
+            if all_failed:
+                self.end_round_with_no_winner()
+#                print("draw")
+                return self.reward, True , ratio , True;
+
+            return self.reward, False , ratio , worked;
+#        print(" game over ")
         game_over = self.check_for_win(True)
+#        print(" game over  2  ")
         if (self.player_score > 0 and  self.computer_score > 0):
             ratio = (self.player_score / self.computer_score)
         else:
              ratio = 0
-        return self.reward, game_over , ratio ;
+        all_failed = self.completletley_full_check()
+        if all_failed:
+            self.end_round_with_no_winner()
+            print("draw")
+            return self.reward, True , ratio , True;
+        return self.reward, game_over , ratio , worked;
 
 #thegame = connect_4_game()
 #thegame.one_human_game()
+
 
