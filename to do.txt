@@ -1,0 +1,10 @@
+
+1) try replacing extra layers with conv layers
+2) try changing inputs from 3 x bools to 1 x ints 
+
+3) its not learning to try putting coins into full slots less over time, why not?
+
+4) its not learning to play better 
+
+5)  make way to show each neuron. ( perhaps save states and then make a gif out of that ) 
+
